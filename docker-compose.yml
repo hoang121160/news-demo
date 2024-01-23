@@ -1,0 +1,11 @@
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: TMGSdb
+      MYSQL_USER: son
+      MYSQL_PASSWORD: 1111
+    ports:
+      - 3306:3306
