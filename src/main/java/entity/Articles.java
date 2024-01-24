@@ -6,19 +6,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
+
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "users")
-public class User {
+@Table(name = "articles")
+public class Articles {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "username")
-    private String username;
-    @Column(name = "password")
-    private String password;
-
+    @Column(name = "title")
+    private String title;
+    @Column(name = "content")
+    private String content;
+    @Column(name = "date")
+    private Date date;
+    @Column(name = "media")
+    private String medie;
 }
