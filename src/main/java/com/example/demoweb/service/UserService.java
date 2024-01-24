@@ -2,10 +2,10 @@ package com.example.demoweb.service;
 
 import com.example.demoweb.config.JwtTokenProvider;
 import com.example.demoweb.dto.UserRequest;
-import com.example.demoweb.dto.UserResponse;
 import com.example.demoweb.entity.Role;
 import com.example.demoweb.entity.User;
 import com.example.demoweb.dto.UserDTO;
+import com.example.demoweb.exception.UserNotFoundException;
 import com.example.demoweb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,21 +22,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
+    private final EmailService emailService;
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    public UserService(PasswordEncoder passwordEncoder,UserRepository userRepository,JwtTokenProvider tokenProvider) {
+    public UserService(PasswordEncoder passwordEncoder,UserRepository userRepository,JwtTokenProvider tokenProvider,
+                       EmailService emailService) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.tokenProvider = tokenProvider;
+        this.emailService = emailService;
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -93,6 +95,35 @@ public class UserService implements UserDetailsService {
             // Xử lý trường hợp đăng nhập không thành công
             throw new RuntimeException("Login failed", e);
         }
+    }
+    public void requestPasswordReset(String email)throws UserNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+        //Tạo và lưu token đặt lại mật khẩu
+        String resetToken = UUID.randomUUID().toString();
+        user.setResetPasswordToken(resetToken);
+        user.setResetPasswordTokenExpiration(calculateTokenExpirationDate());
+        userRepository.save(user);
+        emailService.sendResetPasswordEmail(email, resetToken);
+    }
+    public void confirmPasswordReset(String email, String token, String newPassword){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new UserNotFoundException("User not found with email: \" + email)"));
+        if (!user.getResetPasswordToken().equals(token) || isTokenExpired(user.getResetPasswordTokenExpiration())){
+            throw new IllegalArgumentException("Invalid or expired reset password token.");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+    private Date calculateTokenExpirationDate() {
+        // Logic để tính thời gian hết hạn của token (ví dụ: 24 giờ sau từ thời điểm hiện tại)
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, 24);
+        return calendar.getTime();
+    }
+    private boolean isTokenExpired(Date expirationDate) {
+        // Kiểm tra xem token có hết hạn hay không
+        return expirationDate != null && expirationDate.before(new Date());
     }
 
 }

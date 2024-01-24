@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 @Getter
 @Setter
@@ -45,5 +46,18 @@ public class User {
 
     @OneToMany(mappedBy = "author")
     private List<Article> articles;
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiration")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date resetPasswordTokenExpiration;
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
 
 }
