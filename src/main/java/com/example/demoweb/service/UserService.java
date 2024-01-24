@@ -1,16 +1,25 @@
 package com.example.demoweb.service;
 
+import com.example.demoweb.config.JwtTokenProvider;
+import com.example.demoweb.dto.UserRequest;
+import com.example.demoweb.dto.UserResponse;
 import com.example.demoweb.entity.Role;
 import com.example.demoweb.entity.User;
 import com.example.demoweb.dto.UserDTO;
 import com.example.demoweb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,11 +29,14 @@ import java.util.List;
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final JwtTokenProvider tokenProvider;
     @Autowired
-    public UserService(PasswordEncoder passwordEncoder,UserRepository userRepository) {
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    public UserService(PasswordEncoder passwordEncoder,UserRepository userRepository,JwtTokenProvider tokenProvider) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
+        this.tokenProvider = tokenProvider;
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -58,4 +70,29 @@ public class UserService implements UserDetailsService {
 
         userRepository.save(newUser);
     }
+
+    public String login(UserRequest userRequest){
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            userRequest.getUsername(),
+                            userRequest.getPassword()
+                    )
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            if (authentication.isAuthenticated()) {
+                // Xác thực thành công, trả về JWT
+                String jwt = tokenProvider.generateToken(userRequest.getUsername());
+                return jwt;
+            } else {
+                // Xác thực không thành công
+                throw new BadCredentialsException("Authentication failed");
+            }
+        } catch (AuthenticationException e) {
+            // Xử lý trường hợp đăng nhập không thành công
+            throw new RuntimeException("Login failed", e);
+        }
+    }
+
 }
