@@ -1,4 +1,4 @@
-package entity;
+package com.example.demoweb.entity;
 
 public enum Role {
     USER,
