@@ -92,15 +92,20 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new UserNotFoundException("Comment not found with ID: " + commentId));
         User authenticatedUser = getAuthenticatedUser();
-        if (authenticatedUser != null && authenticatedUser.getId().equals(comment.getUser().getId())){
+        if (authenticatedUser == null) {
+            throw new UnauthorizedException("User not authorized to delete this comment");
+        }
+        if (!authenticatedUser.getId().equals(comment.getUser().getId())) {
+            throw new UnauthorizedException("User not authorized to delete this comment");
+        }
             Article article = comment.getArticle();
             article.getComments().remove(comment);
             articleRepository.save(article);
-            commentRepository.delete(comment);
-        }else {
-            throw new UnauthorizedException("User not authorized to delete this comment");
-        }
 
+            User user = comment.getUser();
+            user.getComments().remove(comment);
+            userRepository.save(user);
+            commentRepository.delete(comment);
     }
 
 }
