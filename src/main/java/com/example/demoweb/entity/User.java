@@ -47,6 +47,9 @@ public class User {
     @OneToMany(mappedBy = "author")
     private List<Article> articles;
 
+    @OneToMany(mappedBy = "user")
+    private List<Comment> comments;
+
     @Column(name = "reset_password_token")
     private String resetPasswordToken;
 
