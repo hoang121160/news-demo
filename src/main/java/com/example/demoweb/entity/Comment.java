@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import javax.persistence.*;
 @Entity
@@ -26,7 +28,7 @@ public class Comment {
 
     @NotNull(message = "Date is required")
     @Column(name = "date")
-    private Date date;
+    private LocalDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "article_id")

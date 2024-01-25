@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.AuthenticationException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,18 +51,20 @@ public class CommentService {
 //        }
 //        return commentDTOs;
 //    }
-    public Comment createComment(String content, Long articleId) {
+    public CommentDTO createComment(String content, Long articleId) {
         try {
             User authenticatedUser = getAuthenticatedUser();
-
-            if (authenticatedUser != null) {
+            if (authenticatedUser == null) {
+                throw new BadCredentialsException("User not authenticated");
+            }
+            Article article = articleRepository.findById(articleId)
+                    .orElseThrow(() -> new UserNotFoundException("Article not found with ID: " + articleId));
                 Comment comment = new Comment();
                 comment.setContent(content);
-                comment.setDate(new Date());
-                Article article = articleRepository.findById(articleId)
-                        .orElseThrow(() -> new UserNotFoundException("Article not found with ID: " + articleId));
+                comment.setDate(LocalDateTime.now());
                 comment.setArticle(article);
                 comment.setUser(authenticatedUser);
+
                 Comment createdComment = commentRepository.save(comment);
 
                 // Tạo CommentDTO và trả về
@@ -70,12 +73,8 @@ public class CommentService {
                 commentDTO.setContent(createdComment.getContent());
                 commentDTO.setDate(createdComment.getDate());
 
-                return createdComment;
-            } else {
-                throw new BadCredentialsException("User not authenticated");
-            }
+                return commentDTO;
         } catch (BadCredentialsException e) {
-            e.printStackTrace();
             throw e;
         }
     }

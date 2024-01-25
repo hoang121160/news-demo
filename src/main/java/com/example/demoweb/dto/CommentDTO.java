@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -12,5 +13,5 @@ import java.util.Date;
 public class CommentDTO {
     private String username;
     private String content;
-    private Date date;
+    private LocalDateTime date;
 }
