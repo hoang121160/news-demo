@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -26,26 +29,31 @@ public class Article {
     private String title;
 
     @NotBlank(message = "Content is required")
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @NotNull(message = "Date is required")
     @Column(name = "date")
-    private Date date;
+    private LocalDateTime date;
 
     @NotBlank(message = "Category is required")
     @Column(name = "category")
     private String category;
 
-    @NotBlank(message = "Media is required")
-    @Column(name = "media")
-    private String media;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "article_id")
+    private List<Image> images = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "author_id")
     private User author;
 
     @OneToMany(mappedBy = "article")
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
+
+    public void addImage(Image image) {
+        images.add(image);
+        image.setArticle(this);
+    }
 
 }

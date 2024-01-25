@@ -21,19 +21,14 @@ public class CommentController {
     private CommentService commentService;
 
 
-    @PostMapping("/create-comment")
-    public ResponseEntity<CommentDTO> createComment(@RequestParam String content, @RequestParam Long articleId) {
+    @PostMapping("/create")
+    public ResponseEntity<CommentDTO> createComment(@RequestParam String content
+                                                    , @RequestParam Long articleId) {
         try {
-            Comment createdComment = commentService.createComment(content, articleId);
-
-            CommentDTO commentDTO = new CommentDTO();
-            commentDTO.setUsername(createdComment.getUser().getUsername());
-            commentDTO.setContent(createdComment.getContent());
-            commentDTO.setDate(createdComment.getDate());
-
-            return ResponseEntity.ok(commentDTO);
+            CommentDTO createdComment = commentService.createComment(content, articleId);
+            return ResponseEntity.ok(createdComment);
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
     @DeleteMapping("/delete/{commentId}")

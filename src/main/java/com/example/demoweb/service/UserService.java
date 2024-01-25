@@ -116,7 +116,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
     private Date calculateTokenExpirationDate() {
-        // Logic để tính thời gian hết hạn của token (ví dụ: 24 giờ sau từ thời điểm hiện tại)
+        // Logic để tính thời gian hết hạn của token
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.HOUR, 24);
         return calendar.getTime();
