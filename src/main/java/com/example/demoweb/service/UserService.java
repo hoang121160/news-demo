@@ -1,8 +1,8 @@
 package com.example.demoweb.service;
 
 import com.example.demoweb.config.JwtTokenProvider;
-import com.example.demoweb.dto.UserRequest;
-import com.example.demoweb.entity.Role;
+import com.example.demoweb.dto.request.UserRequest;
+import com.example.demoweb.enums.Role;
 import com.example.demoweb.entity.User;
 import com.example.demoweb.dto.UserDTO;
 import com.example.demoweb.exception.UserNotFoundException;

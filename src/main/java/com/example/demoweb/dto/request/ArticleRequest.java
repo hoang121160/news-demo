@@ -1,7 +1,7 @@
-package com.example.demoweb.dto;
+package com.example.demoweb.dto.request;
 
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ArticleResponse {
-    private Long id;
+public class ArticleRequest {
     private String title;
     private String content;
-    private LocalDateTime date;
     private String category;
-    private List<ImageDTO> images;
+    private List<MultipartFile> images;
 }

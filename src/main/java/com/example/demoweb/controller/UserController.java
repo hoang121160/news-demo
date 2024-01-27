@@ -1,7 +1,7 @@
 package com.example.demoweb.controller;
 
 import com.example.demoweb.dto.UserDTO;
-import com.example.demoweb.dto.UserRequest;
+import com.example.demoweb.dto.request.UserRequest;
 import com.example.demoweb.exception.UserNotFoundException;
 import com.example.demoweb.service.EmailService;
 import com.example.demoweb.service.UserService;
