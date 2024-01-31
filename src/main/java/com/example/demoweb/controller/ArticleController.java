@@ -50,4 +50,15 @@ public class ArticleController {
     public BasePage<ArticleAvatar> getAllArticle(@RequestBody ApiListBaseRequest apiListBaseRequest){
         return articleService.getAll(apiListBaseRequest);
     }
+    @Secured("ROLE_ADMIN")
+    @PutMapping("/{id}")
+    public ResponseEntity<String> fix(@RequestBody ArticleRequest articleRequest){
+        try {
+            articleService.update(articleRequest);
+            return new ResponseEntity<>("Article updated successfully", HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error update article", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

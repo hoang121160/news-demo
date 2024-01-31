@@ -66,6 +66,20 @@ public class ArticleService {
             e.printStackTrace();
         }
     }
+    public void update(ArticleRequest articleRequest){
+        try{
+        if(isAdmin()){
+            if(isAnyFieldEmpty(articleRequest)){
+                throw new MasterException(HttpStatus.BAD_REQUEST, "không được để trống");
+            }
+                Article article = mapper.toEntity(articleRequest);
+                articleRepository.save(article);
+                handleImages(article, articleRequest.getImages());
+        }}
+        catch (RuntimeException e){
+            e.printStackTrace();
+        }
+    }
     private boolean isAdmin() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -84,6 +98,14 @@ public class ArticleService {
             return userRepository.findByUsername(username);
         }
         return null;
+    }
+    private boolean isAnyFieldEmpty(ArticleRequest articleRequest) {
+        return Stream.of(
+                articleRequest.getTitle(),
+                articleRequest.getContent(),
+                articleRequest.getCategory(),
+                articleRequest.getImages()
+        ).anyMatch(field -> field == null || field.toString().trim().isEmpty());
     }
 
     private Article convertToEntity(ArticleRequest articleRequest, User currentUser) {
