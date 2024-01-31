@@ -41,6 +41,7 @@ public class ArticleController {
     public ArticleDetailView getDetail(@PathVariable(name = "id") Long id){
         return articleService.getArticleById(id);
     }
+    @Secured("ROLE_ADMIN")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable(name = "id") Long id){
         articleService.deleteArticle(id);
