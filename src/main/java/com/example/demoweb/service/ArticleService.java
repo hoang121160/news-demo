@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 public class ArticleService {
@@ -156,6 +157,10 @@ public class ArticleService {
         } catch (RuntimeException e){
             e.printStackTrace();
         }
+    }
+    public BasePage<ArticleAvatar> getAll(ApiListBaseRequest apiListBaseRequest){
+        Page<Article> page = articleRepository.findAll(FilterDataUtil.buildPageRequest(apiListBaseRequest));
+        return this.map(page);
     }
 
 

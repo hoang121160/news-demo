@@ -45,4 +45,8 @@ public class ArticleController {
     public void delete(@PathVariable(name = "id") Long id){
         articleService.deleteArticle(id);
     }
+    @GetMapping("/")
+    public BasePage<ArticleAvatar> getAllArticle(@RequestBody ApiListBaseRequest apiListBaseRequest){
+        return articleService.getAll(apiListBaseRequest);
+    }
 }
