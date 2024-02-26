@@ -20,15 +20,13 @@ public class ArticleController {
     public ArticleController(ArticleService articleService) {
         this.articleService = articleService;
     }
-    @Secured("ROLE_ADMIN")
+
     @PostMapping("/create")
     public ResponseEntity<String> createArticle(@RequestBody ArticleRequest articleRequest) {
         try {
             articleService.createArticle(articleRequest);
             return new ResponseEntity<>("Article created successfully", HttpStatus.CREATED);
-        } catch (BadCredentialsException e) {
-            return new ResponseEntity<>("Only ADMIN users can create articles", HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>("Error creating article", HttpStatus.INTERNAL_SERVER_ERROR);
         }

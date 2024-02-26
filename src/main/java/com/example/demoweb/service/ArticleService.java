@@ -50,36 +50,59 @@ public class ArticleService {
         this.mapper = mapper;
     }
 
+    //    public void createArticle(ArticleRequest articleRequest) {
+//        try {
+//            if (!isAdmin()) {
+//                throw new BadCredentialsException("Only ADMIN users can create articles");
+//            }
+//            User currentUser = getCurrentUser();
+//            if (currentUser == null) {
+//                throw new BadCredentialsException("User not authenticated");
+//            }
+//            Article article = convertToEntity(articleRequest, currentUser);
+//            articleRepository.save(article);
+//            handleImages(article, articleRequest.getImages());
+//        } catch (RuntimeException e) {
+//            e.printStackTrace();
+//        }
+//    }
     public void createArticle(ArticleRequest articleRequest) {
         try {
-            if (!isAdmin()) {
-                throw new BadCredentialsException("Only ADMIN users can create articles");
-            }
-            User currentUser = getCurrentUser();
-            if (currentUser == null) {
-                throw new BadCredentialsException("User not authenticated");
-            }
-            Article article = convertToEntity(articleRequest, currentUser);
+            Article article = convertToEntity(articleRequest);
             articleRepository.save(article);
             handleImages(article, articleRequest.getImages());
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
     }
-    public void update(ArticleRequest articleRequest){
-        try{
-        if(isAdmin()){
-            if(isAnyFieldEmpty(articleRequest)){
-                throw new MasterException(HttpStatus.BAD_REQUEST, "không được để trống");
-            }
+
+    private Article convertToEntity(ArticleRequest articleRequest) {
+        Article article = new Article();
+        article.setTitle(articleRequest.getTitle());
+        article.setContent(articleRequest.getContent());
+        article.setCategory(articleRequest.getCategory());
+        article.setDate(LocalDateTime.now());
+
+        List<Image> images = convertToImages(articleRequest.getImages());
+        article.setImages(images);
+        return article;
+    }
+
+    public void update(ArticleRequest articleRequest) {
+        try {
+            if (isAdmin()) {
+                if (isAnyFieldEmpty(articleRequest)) {
+                    throw new MasterException(HttpStatus.BAD_REQUEST, "không được để trống");
+                }
                 Article article = mapper.toEntity(articleRequest);
                 articleRepository.save(article);
                 handleImages(article, articleRequest.getImages());
-        }}
-        catch (RuntimeException e){
+            }
+        } catch (RuntimeException e) {
             e.printStackTrace();
         }
     }
+
     private boolean isAdmin() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -99,6 +122,7 @@ public class ArticleService {
         }
         return null;
     }
+
     private boolean isAnyFieldEmpty(ArticleRequest articleRequest) {
         return Stream.of(
                 articleRequest.getTitle(),
@@ -108,18 +132,18 @@ public class ArticleService {
         ).anyMatch(field -> field == null || field.toString().trim().isEmpty());
     }
 
-    private Article convertToEntity(ArticleRequest articleRequest, User currentUser) {
-        Article article = new Article();
-        article.setTitle(articleRequest.getTitle());
-        article.setContent(articleRequest.getContent());
-        article.setCategory(articleRequest.getCategory());
-        article.setDate(LocalDateTime.now());
-        article.setAuthor(currentUser);
-
-        List<Image> images = convertToImages(articleRequest.getImages());
-        article.setImages(images);
-        return article;
-    }
+//    private Article convertToEntity(ArticleRequest articleRequest, User currentUser) {
+//        Article article = new Article();
+//        article.setTitle(articleRequest.getTitle());
+//        article.setContent(articleRequest.getContent());
+//        article.setCategory(articleRequest.getCategory());
+//        article.setDate(LocalDateTime.now());
+//        article.setAuthor(currentUser);
+//
+//        List<Image> images = convertToImages(articleRequest.getImages());
+//        article.setImages(images);
+//        return article;
+//    }
 
     private List<Image> convertToImages(List<MultipartFile> imageFiles) {
         List<Image> images = new ArrayList<>();
@@ -136,7 +160,7 @@ public class ArticleService {
         return images;
     }
 
-    private void handleImages(Article article, List<MultipartFile> imageFiles) {
+    public void handleImages(Article article, List<MultipartFile> imageFiles) {
         for (MultipartFile imageFile : imageFiles) {
             try {
                 // Xử lý và lưu hình ảnh vào cơ sở dữ liệu
@@ -151,11 +175,12 @@ public class ArticleService {
             }
         }
     }
+
     protected BasePage<ArticleAvatar> map(Page<Article> page) {
         BasePage<ArticleAvatar> rPage = new BasePage<>();
         rPage.setData(mapper.toListDao(page.getContent()));
         rPage.setTotalPage(page.getTotalPages());
-        rPage.setTotalRecord( page.getTotalElements());
+        rPage.setTotalRecord(page.getTotalElements());
         rPage.setPage(page.getPageable().getPageNumber());
         return rPage;
     }
@@ -165,22 +190,25 @@ public class ArticleService {
         Page<Article> page = articleRepository.findArticleByCategory(category, pageable);
         return this.map(page);
     }
-    public ArticleDetailView getArticleById(Long id){
+
+    public ArticleDetailView getArticleById(Long id) {
         Article article = articleRepository.findById(id).orElseThrow(() -> new MasterException(HttpStatus.NOT_FOUND, "Hừm...trang này không tồn tại. Hãy thử tìm kiếm nội dung khác."));
         return mapper.articleToArticleDetail(article);
     }
-    public void deleteArticle(Long id){
+
+    public void deleteArticle(Long id) {
         try {
-            if(isAdmin()) {
+            if (isAdmin()) {
                 Objects.requireNonNull(id, "ID của Article không được null");
-                Article article = articleRepository.findById(id).orElseThrow(()-> new MasterException(HttpStatus.NOT_FOUND, "Không tìm thấy Bài viết với ID"));
+                Article article = articleRepository.findById(id).orElseThrow(() -> new MasterException(HttpStatus.NOT_FOUND, "Không tìm thấy Bài viết với ID"));
                 articleRepository.delete(article);
             }
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             e.printStackTrace();
         }
     }
-    public BasePage<ArticleAvatar> getAll(ApiListBaseRequest apiListBaseRequest){
+
+    public BasePage<ArticleAvatar> getAll(ApiListBaseRequest apiListBaseRequest) {
         Page<Article> page = articleRepository.findAll(FilterDataUtil.buildPageRequest(apiListBaseRequest));
         return this.map(page);
     }
